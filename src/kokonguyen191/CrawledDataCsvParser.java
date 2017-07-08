@@ -147,6 +147,27 @@ public class CrawledDataCsvParser {
 	/**
 	 * Get filename from url
 	 * 
+	 * @param prefix
+	 *            static path
+	 * @param str
+	 *            url
+	 * @param loc
+	 *            location of image
+	 * @return
+	 */
+	static String returnFileName(String prefix, String str, int loc) {
+		if (str == null || str.equals("")) {
+			return "";
+		} else {
+			return String.format("%s/%s", prefix, str.split("/")[loc]);
+		}
+	}
+
+	/**
+	 * Get filename from url
+	 * 
+	 * @param prefix
+	 *            static path
 	 * @param str
 	 *            url
 	 * @return
@@ -189,7 +210,7 @@ public class CrawledDataCsvParser {
 					i += 2;
 					max += 2;
 				} else if (c == '×') {
-					sb.replace(i, i+1, " ×");
+					sb.replace(i, i + 1, " ×");
 					i += 1;
 					max += 1;
 				} else if (c == '—') {
@@ -219,13 +240,24 @@ public class CrawledDataCsvParser {
 					toAdd.action_skill_effects = dengekiEquivalence.action_skill_effects;
 					toAdd.skill_comment = dengekiEquivalence.skill_comment;
 					toAdd.skill_preview = returnFileName("hoshimori/static/uploaded/c/skill",
-							dengekiEquivalence.skill_preview);
+							dengekiEquivalence.skill_preview, 8);
 					toAdd.charge_name = dengekiEquivalence.charge_name;
 					toAdd.charge_hit = dengekiEquivalence.charge_hit;
 					toAdd.charge_damage = dengekiEquivalence.charge_damage;
 					toAdd.charge_range = dengekiEquivalence.charge_range;
 					toAdd.charge_comment = dengekiEquivalence.charge_comment;
 				}
+			} else {
+				toAdd.card_type = dengekiEquivalence.card_type;
+				toAdd.action_skill_effects = dengekiEquivalence.action_skill_effects;
+				toAdd.skill_comment = dengekiEquivalence.skill_comment;
+				toAdd.skill_preview = returnFileName("hoshimori/static/uploaded/c/skill",
+						dengekiEquivalence.skill_preview, 8);
+				toAdd.charge_name = dengekiEquivalence.charge_name;
+				toAdd.charge_hit = dengekiEquivalence.charge_hit;
+				toAdd.charge_damage = dengekiEquivalence.charge_damage;
+				toAdd.charge_range = dengekiEquivalence.charge_range;
+				toAdd.charge_comment = dengekiEquivalence.charge_comment;
 			}
 
 			// Get images url
@@ -269,8 +301,30 @@ public class CrawledDataCsvParser {
 				throw new IllegalArgumentException(String.format("Funny card format: %s", card_zh.japanese_name));
 			}
 
+			// Translate action skill damage
 			toAdd.action_skill_damage = skillDamageTranslate(toAdd.action_skill_damage);
 			toAdd.evolved_action_skill_damage = skillDamageTranslate(toAdd.evolved_action_skill_damage);
+
+			// Translate nakayoshi target
+			if (!toAdd.nakayoshi_skill_target.equals("") && !toAdd.nakayoshi_skill_target.equals(" ")) {
+				StringBuilder sb_naka = new StringBuilder(toAdd.nakayoshi_skill_target);
+				for (int i = 0; i < sb_naka.length(); i++) {
+					if (sb_naka.charAt(i) == '與' || sb_naka.charAt(i) == '、') {
+						sb_naka.setCharAt(i, ',');
+					}
+				}
+				toAdd.nakayoshi_skill_target = translator.translateSentence(sb_naka.toString(), ",");
+			}
+
+			if (!toAdd.evolved_nakayoshi_skill_target.equals("") && !toAdd.evolved_nakayoshi_skill_target.equals(" ")) {
+				StringBuilder sb_naka_evolved = new StringBuilder(toAdd.evolved_nakayoshi_skill_target);
+				for (int i = 0; i < sb_naka_evolved.length(); i++) {
+					if (sb_naka_evolved.charAt(i) == '與' || sb_naka_evolved.charAt(i) == '、') {
+						sb_naka_evolved.setCharAt(i, ',');
+					}
+				}
+				toAdd.evolved_nakayoshi_skill_target = translator.translateSentence(sb_naka_evolved.toString(), ",");
+			}
 
 			database.put(toAdd.name, toAdd);
 		}
