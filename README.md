@@ -1,6 +1,6 @@
 # Hoshimori Project
 
-This is a database processor for the main [project](https://github.com/kokonguyen191/Hoshimori-Project)
+This is meant to be used as a database processor for the main [project](https://github.com/kokonguyen191/Hoshimori-Project)
 
 ## How to use?
 
