@@ -1,18 +1,26 @@
 package kokonguyen191;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+
+import com.ibm.icu.text.Transliterator;
+
 import java.util.HashSet;
 
 public class Translator {
 
 	private HashMap<String, String> dict;
 	HashSet<String> untranslated;
+	public LinkedList<String> keySet;
+	
 
 	private void generate(String[] raw) {
 		for (String entry : raw) {
 			String[] splitted = entry.split(",");
 			dict.put(splitted[0], splitted[1]);
+			keySet.add(splitted[0]);
 		}
 	}
 
@@ -37,13 +45,125 @@ public class Translator {
 		return sb.toString();
 	}
 
+	String linearSearchAndTranslate(String str) {
+		if (str.equals("")) {
+			return str;
+		} else {
+			StringBuilder sb = new StringBuilder(str);
+			if (sb.length() == 1) {
+				return sb.charAt(0) > 255 ? str : "";
+			} else if (sb.length() == 2) {
+				if (sb.charAt(0) > 255 && sb.charAt(1) > 255) {
+					return str;
+				} else if (sb.charAt(0) > 255) {
+					return String.valueOf(sb.charAt(0));
+				} else if (sb.charAt(1) > 255) {
+					return String.valueOf(sb.charAt(1));
+				} else {
+					return "";
+				}
+			} else {
+				ArrayList<Integer> memo = new ArrayList<Integer>();
+				LinkedList<String> result = new LinkedList<String>();
+				if (sb.charAt(0) > 255) {
+					memo.add(0);
+				}
+				for (int i = 1; i < sb.length(); i++) {
+					if (((double) sb.charAt(i) - 255.5) * ((double) sb.charAt(i - 1) - 255.5) < 0) {
+						memo.add(i);
+					}
+				}
+				if (memo.get(memo.size() - 1) != sb.length()) {
+					memo.add(sb.length());
+				}
+				for (int i = 0; i < memo.size() - 1; i++) {
+					String temp = sb.substring(memo.get(i), memo.get(i + 1));
+					if (i % 2 == 0) {
+						temp = translatePhrase(temp);
+					}
+					result.add(temp);
+				}
+				return String.join("", result);
+			}
+		}
+	}
+
+	// Don't use this too much
+	String replaceEverything(String str) {
+		for (String key : keySet) {
+			str = str.replaceAll(key, dict.get(key));
+		}
+		hasUntranslated(str);
+		return str;
+	}
+
 	boolean canTranslate(String str) {
 		return dict.containsKey(str);
 	}
 
+	boolean hasUntranslated(String str) {
+		if (str.equals("")) {
+			return false;
+		} else {
+			StringBuilder sb = new StringBuilder(str);
+			if (sb.length() == 1) {
+				if (sb.charAt(0) > 255) {
+					untranslated.add(sb.toString());
+					return true;
+				} else {
+					return false;
+				}
+			} else if (sb.length() == 2) {
+				if (sb.charAt(0) > 255 && sb.charAt(1) > 255) {
+					untranslated.add(sb.toString());
+					return true;
+				} else if (sb.charAt(0) > 255) {
+					untranslated.add(String.valueOf(sb.charAt(0)));
+					return true;
+				} else if (sb.charAt(1) > 255) {
+					untranslated.add(String.valueOf(sb.charAt(1)));
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				ArrayList<Integer> memo = new ArrayList<Integer>();
+				boolean result = false;
+				if (sb.charAt(0) > 255) {
+					memo.add(0);
+				}
+				for (int i = 1; i < sb.length(); i++) {
+					if (((double) sb.charAt(i) - 255.5) * ((double) sb.charAt(i - 1) - 255.5) < 0) {
+						memo.add(i);
+					}
+				}
+				if (memo.size() == 0) {
+					return false;
+				} else {
+					if (memo.get(memo.size() - 1) != sb.length()) {
+						memo.add(sb.length());
+					}
+					for (int i = 0; i < memo.size() - 1; i++) {
+						String temp = sb.substring(memo.get(i), memo.get(i + 1));
+						if (i % 2 == 0) {
+							untranslated.add(temp);
+						}
+						result = true;
+					}
+					return result;
+				}
+			}
+		}
+	}
+
 	void printUntranslated() {
 		if (!untranslated.isEmpty()) {
-			System.out.println("These words or sentences haven't been translated:");
+			System.out.println("=====================================================");
+			System.out.println("=====================================================");
+			System.out.println("==These words or sentences haven't been translated:==");
+			System.out.println("=====================================================");
+			System.out.println("=====================================================");
+			System.out.println();
 			Iterator<String> ite = untranslated.iterator();
 			while (ite.hasNext()) {
 				System.out.println(ite.next());
@@ -54,151 +174,206 @@ public class Translator {
 	public Translator(String[] raw) {
 		untranslated = new HashSet<String>();
 		dict = new HashMap<String, String>();
+		keySet = new LinkedList<String>();
 		generate(raw);
 	}
 
 	public static void main(String[] args) {
-		String[] rawDict = {
-				// Character translate
-				"みき,Miki", "昴,Subaru", "遥香,Haruka", "望,Nozomi", "ゆり,Yuri", "くるみ,Kurumi", "あんこ,Anko", "蓮華,Renge",
-				"明日葉,Asuha", "桜,Sakura", "ひなた,Hinata", "楓,Kaede", "ミシェル,Michelle", "心美,Kokomi", "うらら,Urara",
-				"サドネ,Sadone", "花音,Kanon", "詩穂,Shiho", "茉梨,Mari", "樹,Itsuki", "風蘭,Fuuran",
-				"明日葉(中1),Asuha (Middle School Year 1)",
-
-				// Repair card name
-				"【Chuuuuu♡Lip集合】ミシェル,【Chuuuuu Lip集合】ミシェル", "【サブカ専用】Chuuuuu♡Lip(ロゴ),【サブカ専用】Chuuuuu Lip(ロゴ)",
-				"【サブカ専用】Chuuuuu♡Lip(サイン),【サブカ専用】Chuuuuu Lip(サイン)",
-
-				// Batch and special card name
-				"冬制服,Winter Uniform", "体操服,Gym Uniform", "私服,Plain Clothes", "ラクロス部,Lacrosse Club",
-				"フットサル部,Futsal Club", "吹奏楽部,Brass Band Club", "テニス部,Tennis Club", "剣道部,Kendo Club", "化学部,Chemical Club",
-				"パソコン部,PC Club", "新体操部,New Gymnastic Club", "生徒会長,Student Council President", "将棋部,Shogi Club",
-				"ソフトボール部,Softball Club", "美術部,Arts Club", "手芸部,Handcraft Club", "天文部,Astronomy Club",
-				"水泳部,Swimming Club", "夕暮れの帰り道,The Way Back Home in Dusk",
-				"校舎裏の告白,Confession Behind the School Building", "ジャズ喫茶,Jazz Teahouse", "夕焼けの屋上,Rooftop in Sunset",
-				"生活指導,Life Guidance", "木陰で読書,Reading in the Shade", "大盛りラーメン,Super-size Ramen",
-				"女の子ウォッチング,Watching Girls", "文武両道,Diligent Student", "雨宿り,Shelter from the Rain", "動物大好き,Animals Lover",
-				"初めての味,The First Taste", "おやすみなさい,Good Night", "ホラー映画,Horror Film", "ヒミツ発見☆,Secret Finding ☆",
-				"星衣フェニックス,Starsuit Phoenix", "星衣ユニコーン,Starsuit Unicorn", "星衣リヴァイアサン,Starsuit Leviathan",
-				"未来のパティシエ,Future Pâtissière", "サッカー観戦,Soccer Match", "クラシックコンサート,Classical Concert",
-				"ウインドウショッピング,Window Shopping", "自宅菜園,Home Garden", "休日の軒先,Under the Eaves on a Day Off",
-				"大好き遊園地,At the Amusement Park", "ピアノコンクール,Piano Competition", "メイド,Maid",
-				"早朝ジョギング,Early Morning Jogging", "アイドルおっかけ,Idol Groupie", "屋内撮影会,Indoor Photo Session",
-				"巫女のおしごと,A Shrine Maiden's Job", "アイドルコスプレ♡,Idol Cosplay ♡", "チアガール,Cheerleader",
-				"星衣ギャラクシー,Starsuit Galaxy", "夏制服,Summer Uniform", "水着’15,Swimsuit '15", "私服2,Plain Clothes 2",
-				"チャイナドレス,China Dress", "ゲーセンクイーン,Arcade Queen", "楠家の庭園,Kusunoki Family's Garden", "浴衣’15,Yukata '15",
-				"アニマル,Animal", "星衣ヴァルキリー,Starsuit Valkyrie", "星衣パイレーツ,Starsuit Pirate", "ハロウィン’15,Halloween '15",
-				"制服,Uniform", "星衣グリム,Starsuit Grim", "人形あそび,Doll Play", "Chuuuuu♡Lip,Chuuuuu♡Lip", "サブカ専用,Subcard Only",
-				"星守メイド,Hoshimori Maid", "クリスマス’15,Christmas '15", "メリークリスマス！,Merry Christmas!", "大晦日,New Year's Eve",
-				"元旦,New Year's Day", "Sirius,Sirius", "バレンタイン’16,Valentine '16", "ザ・ムービー,The Movie", "入浴,Bathing",
-				"湯上がり,After Bath", "Tiara,Tiara", "Tiara集合,Tiara Set", "Sirius集合,Sirius Set",
-				"Chuuuuu♡Lip集合,Chuuuuu♡Lip Set", "星衣フローラ,Starsuit Flora", "f*f,f*f", "おしのび,In Disguise",
-				"Princess,Princess", "ROUGE,ROUGE", "バースデー’16,Birthday '16", "ウェディング,Wedding", "/MUTE,/MUTE",
-				"Pixie,Pixie", "水着’16,Swimsuit '16", "浴衣’16,Yukata '16", "バニー,Bunny", "祈り,Prayer", "嘆き,Mourning",
-				"パティシエ修行中,Pâtissière in Training", "Clover,Clover", "f*f(アドガver),f*f (Adoga ver)",
-				"添い寝,Sleeping Together", "小悪魔の誘惑,Temptation of the Little Devil", "ハロウィン’16,Halloween '16",
-				"復活ライブ,The Live of Rebirth", "星守メイド’16,Hoshimori Maid '16", "眠り姫名演技中,Sleeping Beauty",
-				"冬デート,Winter Date", "クリスマスパーティー！,Christmas Party!", "みんな一緒,Everyone Together", "巫女,Shrine Maiden",
-				"新春かるた大会,New Year Karuta Tournament", "白衣の天使,Angel in White", "バースデー’17,Birthday '17",
-				"年初めのご挨拶,First Greeting of the Year", "バレンタイン’17,Valentine '17", "雪あそび,Snow Play",
-				"泡沫の恋,Ephemeral Love", "キッチン,Kitchen", "マーチング,Marching", "時計じかけの魔法,Clockwork Magic",
-				"旧体操服,Old Gym Clothes", "神樹ヶ峰制服,Shinjugamine Uniform", "2ndメモリアル,2nd Memorial", "水着’17,Swimsuit '17",
-				"寝間着,Sleepwear", "教師,Teacher", "星衣フローラ散壊,Hoshimori Flora Annihilated", "おうちデート,House Date",
-				"新制服,New Uniform", "希望,Hope", "赤ずきん,Little Red Riding Hood", "18人で出撃！,Sortie with all 18 Students!",
-				"みんな笑顔で,Everyone's Smile", "放課後の約束,Afterschool Promise", "マーチングクラス,Marching Class",
-				"ロマン紀行,Romantic Trip", "16人なら…！,If it is 16 of us...!", "新年挨拶,New Year Greetings",
-				"二人の出会い,The Encounter of the Two",
-
-				// Special
-				"ロゴ,Logo", "200万,2 Million", "銃,Gun", "剣,Sword", "ホワイトデー復刻,White Day Reprint", "台湾,Taiwan",
-				"300万復刻,3 Million Reprint", "メモリーズ復刻,Memories Reprint", "双弾,Twin Barrett", "サイン,Sign", "復刻,Reprint",
-				"砲剣,Gunblade", "杖,Rod", "槌,Hammer", "槍,Spear",
-				
-				// Nakayoshi target
-				"1年生,Year 1 Students", "2年生,Year 2 Students", "莎朶霓,Sadone", "3年生,Year 3 Students", "雙槍,Twin Barrett",
-				"劍槍,Gunblade", "矛,Spear", "所有人,Everyone", "劍,Sword", "美紀,Miki",
-
-		};
-
+		// Dictionary dict = new Dictionary();
+		// String[] rawDict = dict.rawDict;
+		// Translator tran = new Translator(rawDict);
+		//
+		// // Paste shit to translate here
+		// String[] sentences = { "主線 初始卡片", "主線 第1部 第1章 1-1", "主線 第1部 第2章
+		// 10-1", "主線 第1部 第2章 9-4", "主線 第1部 第2章 7-1",
+		// "主線 第1部 第1章 4-4", "主線 第1部 第2章 8-7", "主線 第1部 第2章 11-4", "主線 第1部 第2章
+		// 6-4", "主線 第1部 第2章 11-1",
+		// "主線 第1部 第2章 7-4", "通常轉蛋", "通常轉蛋(～2017/06/20 14:59)",
+		// "首次：通常轉蛋（至2015年6月30日17:59）復刻：通常轉蛋（至2015年11月30日14:59）", "通常轉蛋卡片交換所",
+		// "通常轉蛋（至2015年11月13日14:59）",
+		// "限定轉蛋（至2015年7月31日14:59）", "活動「星守定期テスト～謎のイロウス対話編～」",
+		// "活動「利用者200万人感謝キャンペーン 第3弾」",
+		// "限定轉蛋（至2015年9月30日 14:59）", "限定「浴衣轉蛋」",
+		// "限定「ハロウィン記念ガチャ」限定「復刻ハロウィン記念ガチャ」", "主線 第1部 第6章 44-7",
+		// "限定「アイドル記念ガチャ」限定「復刻アイドル記念ガチャ(1)(2)」", "活動「わたしたちのスタートライン！ 後編」",
+		// "限定「星守女僕轉蛋」", "宿題",
+		// "主線關卡「第48話 笑容的前方所看見的東西」", "限定「白色Xmas記念轉蛋」", "限定「聖夜記念轉蛋」",
+		// "限定「平安夜記念轉蛋」", "活動「第1部総集編 Part1 二人の出会い」",
+		// "限定「迎春記念ガチャ」", "活動「新年のごあいさつ」", "限定「アイドル「蒼」記念ガチャ」限定「復刻アイドル「蒼」記念ガチャ」",
+		// "活動「第1部総集編 Part2 16人ならできること」",
+		// "限定「スウィートチョコ記念ガチャ」", "限定「ビターチョコ記念ガチャ」", "限定「スター記念ガチャ」",
+		// "限定「湯けむり記念ガチャ」", "活動「秘密の合言葉を探せキャンペーン」",
+		// "活動「アイドル応援キャンペーン」", "限定「アイドル「ＲＥＤ」記念ガチャ」", "限定「星守アイドル記念ガチャ」",
+		// "常設「第2部ストーリーガチャ」", "主線 第2部 第3章 60-7",
+		// "常設「デビューガチャ」", "限定「5月4日バースデー記念ガチャ」", "限定「湯けむり記念ガチャ2」",
+		// "活動「ほしもり湯けむりロマン紀行 後編」", "限定「永遠の誓い記念ガチャ」",
+		// "限定「6月3日バースデー記念ガチャ」", "限定「ヴァージンロード記念ガチャ」", "限定「6月26日バースデー記念ガチャ」",
+		// "限定「ミッドナイト記念ガチャ」",
+		// "限定「7月7日バースデー記念ガチャ」", "限定「アイランド記念ガチャ」", "限定「夏祭り’16記念ガチャ」",
+		// "限定「8月14日バースデー記念ガチャ」", "限定「湯けむり記念ガチャ3」",
+		// "限定「8月28日バースデー記念ガチャ」", "限定「お月見記念ガチャ」", "常設「第2部クライマックスガチャ」",
+		// "活動「シルバーウィーク限定ログインボーナスチャレンジ」",
+		// "限定「9月23日バースデー記念ガチャ」", "限定「9月30日バースデー記念ガチャ」", "限定「眠れぬ夜の記念ガチャ」",
+		// "限定「10月2日バースデー記念ガチャ」",
+		// "限定「おやすみなさい記念ガチャ」", "活動「ハロウィンログインボーナスチャレンジ」", "限定「トリック・ナイト記念ガチャ」",
+		// "限定「トリート・ナイト記念ガチャ」",
+		// "限定「10月24日バースデー記念ガチャ」", "限定「学園祭OPEN記念ガチャ」", "限定「11月1日バースデー記念ガチャ」",
+		// "限定「もっともっと!!学園祭記念ガチャ」",
+		// "活動「合同学園祭記念 ログインボーナスチャレンジ」", "獎勵交換所2016/11/25 14:00 ~ 2016/12/14
+		// 14:59(UTC+9)", "限定「内緒の約束記念ガチャ」",
+		// "限定「12月7日バースデー記念ガチャ」", "限定「300万人突破記念ガチャ」", "限定「ときめきウィンター記念ガチャ」",
+		// "限定「ジングルベル記念ガチャ」",
+		// "限定「12月24日バースデー記念ガチャ」", "活動「年末年始 ログインボーナスチャレンジ」", "限定「賀春記念ガチャ」",
+		// "限定「エンジェルの癒し記念ガチャ」",
+		// "限定「1月18日バースデー記念ガチャ」", "活動「2017年スタート記念 ログインボーナスチャレンジ」",
+		// "限定「台湾バトガコラボ記念ガチャ」", "限定「ほんとのキモチは…記念ガチャ」",
+		// "限定「2月3日バースデー記念ガチャ」", "限定「とろける想い記念ガチャ」", "限定「白銀の想い出記念ガチャ」",
+		// "活動「儚き冬の恋心 ログインボーナスチャレンジ」",
+		// "限定「手料理めしあがれ記念ガチャ」", "限定「ホワイトセレクション記念ガチャ」", "限定「3月15日バースデー記念ガチャ」",
+		// "常設「清律音楽学院ガチャ」",
+		// "活動「かけがえのないトキ ログインボーナスチャレンジ」", "限定「3月27日バースデー記念ガチャ」", "主線 第3部 第2章
+		// 100-7", "常設「第3部ガチャ」",
+		// "常設「星守ガチャ」2017/04/04 15:00 ~ 06/09 14:59(UTC+9)",
+		// "常設「星守ガチャ」2017/04/04 15:00 ~ 05/30 14:59(UTC+9)",
+		// "常設「星守ガチャ」2017/04/04 15:00 ~ 06/20 14:59(UTC+9)",
+		// "限定「4月15日バースデー記念ガチャ」",
+		// "常設「星守ガチャ」2017/04/17 15:00 ~ 06/09 14:59(UTC+9)",
+		// "常設「星守ガチャ」2017/04/17 15:00 ~ 05/30 14:59(UTC+9)",
+		// "常設「星守ガチャ」2017/04/17 15:00 ~ 06/20 14:59(UTC+9)",
+		// "限定「2017年昴誕生日記念ガチャ」", "限定「星守メモリーズガチャ 第1弾」",
+		// "常設「第3部ガチャ」2017/05/25 00:00〜23:59(UTC+9)", "常設「星守ガチャ」2017/05/30 15:00
+		// ~ (UTC+9)",
+		// "常設「星守ガチャ」2017/05/30 15:00 ~ 06/30 14:59 (UTC+9)",
+		// "限定「2017年ミシェル誕生日記念ガチャ」", "限定「星守メモリーズガチャ 第2弾」",
+		// "常設「星守ガチャ」2017/06/09 15:00 ~ 06/30 14:59 (UTC+9)",
+		// "常設「星守ガチャ」2017/06/09 15:00 ~ (UTC+9)",
+		// "限定「星守メモリーズガチャ 第3弾」", "常設「星守ガチャ」2017/06/20 15:00 ~ (UTC+9)",
+		// "通常轉蛋(2017/06/20 15:00～)",
+		// "常設「第3部ガチャ」2017/06/23 15:00〜06/25 23:59(UTC+9)",
+		// "限定「2017年蓮華誕生日記念ガチャ」",
+		// "常設「星守ガチャ」2017/06/30 15:00 ~ (UTC+9)", "活動「アニメ放送記念ログインボーナスチャレンジ」",
+		// "限定「2017年望誕生日記念ガチャ」" };
+		//
+		// for (String sen : sentences) {
+		// sen = sen.replace('與', ',');
+		// sen = sen.replace('、', ',');
+		// System.out.println(tran.translatePhrase(sen));
+		// }
+		// tran.printUntranslated();
+		Dictionary dict = new Dictionary();
+		String[] rawDict = dict.rawDict;
 		Translator tran = new Translator(rawDict);
-
-		String[] sentences = { "所有人",
-				"2年生",
-				"矛與槌",
-				"3年生",
-				"1年生",
-				"劍",
-				"矛與杖",
-				"槍",
-				"美紀",
-				"遥香,ひなた,ミシェル,うらら",
-				"雙槍與劍與矛",
-				"槌與矛",
-				"槍與杖",
-				"矛",
-				"槌",
-				"2年生與1年生",
-				"サドネ,望,蓮華,楓,花音",
-				"槌與槍",
-				"劍與杖",
-				"杖",
-				"劍與矛與槌",
-				"矛與槍",
-				"矛與劍",
-				"槌與杖與雙槍",
-				"杖與劍",
-				"劍與槍",
-				"雙槍與槍與杖",
-				"杖與槍",
-				"ゆり",
-				"劍槍與槍與杖",
-				"杖與槌",
-				"槍與雙槍",
-				"詩穂,花音,心美,うらら",
-				"雙槍",
-				"杖與矛",
-				"劍與矛",
-				"劍槍",
-				"槍與劍槍",
-				"槍與矛與槌",
-				"雙槍與槍與劍槍",
-				"槍與劍槍與雙槍",
-				"槌與劍",
-				"杖與槌與劍槍",
-				"劍與槌",
-				"詩穂,みき,ゆり,桜",
-				"杖與槍與劍槍",
-				"劍與雙槍",
-				"槌與杖",
-				"槍與槌",
-				"あんこ",
-				"莎朶霓",
-				"茉梨,樹,風蘭",
-				"劍槍與槍與雙槍",
-				"槍與劍",
-				"杖與劍槍",
-				"劍槍與槌",
-				"劍與杖與雙槍",
-				"雙槍與槍",
-				"劍與矛與雙槍",
-				"矛與雙槍",
-				"花音、詩穂、心美、うらら",
-				"くるみ",
-				"あんこ,昴,くるみ,明日葉,心美",
-				"詩穂",
-				"劍與矛與杖",
-				"雙槍與劍槍",
-				"矛與劍與杖",
-				"杖與槍與雙槍",
-				"矛與劍與雙槍",
-				"槌與劍與矛",
-				"槌與劍槍與杖",
-				"劍槍與槌與杖", };
-
-		for (String sen: sentences) {
-			sen = sen.replace('與', ',');
-			sen = sen.replace('、', ',');
-			System.out.println(tran.translateSentence(sen, ","));
+		String[] me = { "全方位特大範圍×2",
+				"以自身作起點小範圍×5",
+				"全方位特大範圍×3",
+				"移動型極小範圍",
+				"全方位中範圍×5",
+				"全方位中範圍×8",
+				"前方直線×2",
+				"1〜25combo：全方位小範圍",
+				"26〜38combo：全方位大範圍",
+				"39combo以後：全方位特大範圍",
+				"前方n型（反轉的U型）",
+				"全方位中範圍×2",
+				"右&前&左&後方直線",
+				"全方位中範圍×3",
+				"自身",
+				"前方小範圍（移動時瞄準敵人）",
+				"—",
+				"前方直線×5",
+				"前方極小範圍",
+				"前方直線超長距離(T字形)",
+				"前方中範圍",
+				"全方位特大範圍×4",
+				"前方極小範圍×2",
+				"前方&右方&左方直線",
+				"右前方小範圍",
+				"全方位極小範圍（炸彈：全方位中範圍）",
+				"自身周邊中範圍×9",
+				"敵人中心小範圍（距離限制）",
+				"全方位中範囲",
+				"敵人的中心極小範圍x2",
+				"直線十字4個方向（大範圍）",
+				"全方位大範圍×3",
+				"敵人中心中範圍×1",
+				"普通攻擊：全方位小範圍",
+				"降低敵人攻擊力：全方位中範圍",
+				"降低敵人防御力：全方位中範圍",
+				"我方全員",
+				"全方位特大範圍",
+				"前方直線長距離(自動追蹤)",
+				"前方中範圍×2",
+				"前面直線",
+				"全方位小範圍（每段攻擊有2次傷害）",
+				"前方直線（追蹤型）",
+				"全方位大範圍",
+				"左前方&右前方小範圍×3",
+				"直線十字4個方向（自動追蹤）",
+				"左方小範圍",
+				"自身五個方位小範圍",
+				"敵人的中心中範圍×4",
+				"自身四周中範圍",
+				"前方直線三方向",
+				"前方直線",
+				"移動至敵人的中心中範圍",
+				"落地點小範圍",
+				"前方特大範圍",
+				"敵人的中心中範圍",
+				"敵人中心小範圍×3",
+				"全方位中範圍x2",
+				"敵人中心小範圍×9",
+				"全方位小範圍",
+				"右方小範圍",
+				"全方位中範圍",
+				"移動至敵人中心小範圍",
+				"敵人中心中範圍",
+				"自身前方直線超長距離",
+				"前方直線（追蹤型）×2",
+				"自身中心小範圍(移動型)",
+				"移動至敵人中心極小範圍",
+				"直線十字4個方向×3（每段攻擊有2次傷害）",
+				"自身前方中範圍",
+				"前方直線長距離",
+				"四周小範圍×8",
+				"木桶位置的中範圍",
+				"前方極小範圍（移動時瞄準敵人）×3",
+				"以自身作起點中範圍",
+				"前方極小範圍(追蹤移動型)",
+				"自身左方和右方小範圍×3",
+				"敵人的中心小範圍×5",
+				"以自身作起點中範圍×5",
+				"以自身作起點中範圍×4",
+				"全方位小範圍×3",
+				"全方位小範圍×9",
+				"敵人的中心小範圍×9",
+				"敵人的中心極小範圍×3",
+				"全方位小範圍×2",
+				"直線十字4個方向",
+				"敵人中心小範圍",
+				"四周極小範圍×9",
+				"敵人的中心大範圍",
+				"前方直線3方向",
+				"敵人中心小範圍(距離限制)",
+				"全方位極小範圍",
+				"前方直線超長距離(自動追蹤)",
+				"敵人的中心小範圍",
+				"自身中範圍",
+				"自身前方特大範圍",
+				"自身前方大範圍",
+				"前方小範圍",
+				"自身後方短距離",
+				"移動至敵人中心小範圍×6",
+				"敵人中心特大範圍",
+				"前方左右中距離",
+				"自身中心極小範圍(移動追蹤型)",
+				"左前方小範圍",
+				"前方小範圍×2",
+				"後方短距離",
+				"前方大範圍",
+				"落地點中範圍",
+				"敵人中心大範圍", };
+		for (String str : me) {
+			tran.linearSearchAndTranslate(str);
 		}
 		tran.printUntranslated();
 	}

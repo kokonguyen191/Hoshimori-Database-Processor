@@ -52,8 +52,10 @@ public class Card {
 	String evolved_action_skill_damage;
 	String nakayoshi_title;
 	String japanese_nakayoshi_title;
+	String nakayoshi_skill_requirement;
 	String nakayoshi_skill_effect;
 	String nakayoshi_skill_target;
+	String evolved_nakayoshi_skill_requirement;
 	String evolved_nakayoshi_skill_effect;
 	String evolved_nakayoshi_skill_target;
 	String charge_comment;
@@ -148,8 +150,10 @@ public class Card {
 				getString(evolved_action_skill_damage),
 				getString(nakayoshi_title),
 				getString(japanese_nakayoshi_title),
+				getString(nakayoshi_skill_requirement),
 				getString(nakayoshi_skill_effect),
 				getString(nakayoshi_skill_target),
+				getString(evolved_nakayoshi_skill_requirement),
 				getString(evolved_nakayoshi_skill_effect),
 				getString(evolved_nakayoshi_skill_target),
 				getString(charge_comment),
