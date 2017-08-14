@@ -101,9 +101,12 @@ public class Dictionary {
 			"限定轉蛋（至2015年9月30日 14:59）,Limited Gacha (Until 2015/09/30 14:59)", // Inconsistent
 																				// format
 			"2017年望誕生日記念ガチャ,Limited Gacha: Nozomi's Birthday 2017 Event Gacha",
+			"2017年ゆり誕生日記念ガチャ, Limited Gacha: Yuri's Birthday 2017 Event Gacha",
 			"2017年蓮華誕生日記念ガチャ,Limited Gacha: Renge's Birthday 2017 Event Gacha",
 			"星守メモリーズガチャ 第3弾,Limited Gacha: Hoshimori Memories Gacha Part 3",
 			"星守メモリーズガチャ 第2弾,Limited Gacha: Hoshimori Memories Gacha Part 2",
+			"星守メモリーズ水着’16ガチャ,Limited Gacha: Hoshimori Memories Swimwuit '16 Gacha",
+			"星守メモリーズ浴衣ガチャ,Limited Gacha: Hoshimori Memories Yukata Gacha",
 			"2017年ミシェル誕生日記念ガチャ,Limited Gacha: Michelle's Birthday 2017 Event Gacha",
 			"星守メモリーズガチャ 第1弾,Limited Gacha: Hoshimori Memories Gacha Part 1",
 			"2017年昴誕生日記念ガチャ,Limited Gacha: Subaru's Birthday 2017 Event Gacha",
@@ -214,7 +217,8 @@ public class Dictionary {
 			"自身中心小圓,Small area around self", "前方扇形,Front", "劍尖中心小圓,Tip", "有延遲判定,Extension", "擊飛無效化,Null ranged attack",
 			"最大4段,Max 4 hits", "金色炸彈,Gold bombs", "黑色炸彈,Black bombs", "親密度,Affection Level", "巧克力,Chocolate",
 			"普通,Normal", "黃色,Yellow", "紫色,Purple", "黑色,Black", "藍色,Blue", "彩虹,Rainbow", "綠色,Green", "紅色,Red",
-			"櫻桃,Cherry", "薄荷,Mint", "傷害,Damage", "擊暈,Stun", "毒,Poison", };
+			"櫻桃,Cherry", "薄荷,Mint", "傷害,Damage", "擊暈,Stun", "毒,Poison", "藍眼罩,Blue Blindfold", "綠眼罩,Green Blindfold",
+			"低機率,Rare" };
 
 	private String[] replaceDict2 = {
 			// Skill range
@@ -244,8 +248,8 @@ public class Dictionary {
 			"左前方, front left", "次傷害, damage", "反轉的, reversed", "左方小, left side small range", "自身中, self medium range",
 			"前方小, front small range", "移動型, moving type", "追蹤型, tracking type", "前方大, front large range",
 			"前方中, front medium range", "右方小, right side small range", "個方向, direction", "前方, front", "自身, self",
-			"炸彈, bomb", "右方, right side", "以後, rear", "字形, shape", "方向, direction", "型, type", "大, large range",
-			"前, front", "左, left", "右, right", };
+			"炸彈, bomb", "右方, right side", "以後, rear", "字形, shape", "方向, direction", "心中,Center", "型, type",
+			"大, large range", "前, front", "左, left", "右, right", };
 
 	public String[] getConversionDict() {
 		return convertDict;

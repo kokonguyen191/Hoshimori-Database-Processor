@@ -655,7 +655,7 @@ public class CrawledDataCsvParser {
 				String effect = effects.get(i);
 				if (effect.contains("UP") || effect.contains("up") || effect.contains("+")) {
 					positiveEffect = true;
-				} else if (effect.contains("DOWN") || effect.contains("down") || effect.contains("-")) {
+				} else if (effect.contains("DOWN") || effect.contains("down") || effect.contains("-") || effect.contains("−") || effect.contains("‐")) {
 					positiveEffect = false;
 				} else {
 					positiveEffect = true;

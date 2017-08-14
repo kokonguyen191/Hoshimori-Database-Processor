@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import com.ibm.icu.text.Transliterator;
-
 import java.util.HashSet;
 
 public class Translator {
