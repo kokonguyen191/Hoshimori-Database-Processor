@@ -59,6 +59,7 @@ public class CrawledDataCsvParser {
 				Card toAdd = new Card();
 				// Add them all
 				toAdd.card_type = line[0];
+				toAdd.rarity = line[7];
 				StringBuilder name_sb = new StringBuilder(line[3].replace("（ハート）", "♡"));
 				for (int i = 0; i < name_sb.length(); i++) {
 					if (name_sb.charAt(i) == '（' || name_sb.charAt(i) == '（') {
@@ -731,6 +732,7 @@ public class CrawledDataCsvParser {
 					if (dengekiEquivalence == null) {
 						notInDatabase.add(card_zh);
 					} else {
+						toAdd.rarity = dengekiEquivalence.rarity;
 						toAdd.card_type = dengekiEquivalence.card_type;
 						toAdd.action_skill_effects = dengekiEquivalence.action_skill_effects;
 						toAdd.skill_comment = dengekiEquivalence.skill_comment;
@@ -745,6 +747,7 @@ public class CrawledDataCsvParser {
 						toAdd.evolved_nakayoshi_skill_effect = dengekiEquivalence.evolved_nakayoshi_skill_effect;
 					}
 				} else {
+					toAdd.rarity = dengekiEquivalence.rarity;
 					toAdd.card_type = dengekiEquivalence.card_type;
 					toAdd.action_skill_effects = dengekiEquivalence.action_skill_effects;
 					toAdd.skill_comment = dengekiEquivalence.skill_comment;
@@ -773,7 +776,7 @@ public class CrawledDataCsvParser {
 				// Quick convert to int
 				toAdd.i_card_type = Integer.parseInt(converter.translatePhrase(dengekiEquivalence.card_type));
 				toAdd.i_character = Integer.parseInt(converter.translatePhrase(card_zh.character));
-				toAdd.i_rarity = Integer.parseInt(converter.translatePhrase(card_zh.rarity));
+				toAdd.i_rarity = Integer.parseInt(converter.translatePhrase(toAdd.rarity));
 				toAdd.i_weapon = Integer.parseInt(converter.translatePhrase(card_zh.weapon));
 				if (card_zh.skill_affinity.equals("")) {
 					toAdd.i_skill_affinity = 0;
