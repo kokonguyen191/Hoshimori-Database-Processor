@@ -668,6 +668,7 @@ public class CrawledDataCsvParser {
 				// Non value
 				if (effect.contains("無効") || effect.contains("貫") || skillType.equals("Auto-reload")) {
 					value = null;
+					resultLL.add(String.format("%s", skillType));
 				} else {
 					try {
 						value = getNumber(effect);
@@ -707,7 +708,6 @@ public class CrawledDataCsvParser {
 						}
 					}
 				}
-				resultLL.add(String.format("%s", skillType));
 			}
 
 			String[] finalResult = new String[2];
@@ -923,7 +923,7 @@ public class CrawledDataCsvParser {
 					}
 					toAdd.evolved_nakayoshi_skill_target = translator.translateSentence(sbNakaEvolved.toString(), ",");
 				}
-
+				
 				// Translate nakayoshi
 				String[] translated_nakayoshi_skill_effect = nakayoshiEffectTranslate(toAdd.nakayoshi_skill_effect);
 				String[] translated_evolved_nakayoshi_skill_effect = nakayoshiEffectTranslate(
