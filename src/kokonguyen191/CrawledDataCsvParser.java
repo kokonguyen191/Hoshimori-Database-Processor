@@ -707,6 +707,7 @@ public class CrawledDataCsvParser {
 						}
 					}
 				}
+				resultLL.add(String.format("%s", skillType));
 			}
 
 			String[] finalResult = new String[2];
@@ -761,7 +762,7 @@ public class CrawledDataCsvParser {
 					toAdd.nakayoshi_skill_effect = dengekiEquivalence.nakayoshi_skill_effect;
 					toAdd.evolved_nakayoshi_skill_effect = dengekiEquivalence.evolved_nakayoshi_skill_effect;
 				}
-
+				
 				// Get images url
 				toAdd.image = returnFileName("hoshimori/static/uploaded/c/icon", toAdd.image);
 				toAdd.special_icon = returnFileName("hoshimori/static/uploaded/c/icon/special", toAdd.special_icon);
@@ -932,7 +933,7 @@ public class CrawledDataCsvParser {
 				toAdd.nakayoshi_skill_effect = translated_nakayoshi_skill_effect[1];
 				toAdd.evolved_nakayoshi_skill_requirement = translated_evolved_nakayoshi_skill_effect[0];
 				toAdd.evolved_nakayoshi_skill_effect = translated_evolved_nakayoshi_skill_effect[1];
-
+				
 				// Add to database
 				database.put(toAdd.name, toAdd);
 			} catch (Exception e) {
