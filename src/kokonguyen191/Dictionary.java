@@ -90,7 +90,7 @@ public class Dictionary {
 			"主線 第3部 第2章 100-7,Part 3 Chapter 2 Story 100-7", "主線 第4部 第1章 113-1,Part 4 Chapter 1 Story 113-1",
 
 			// Regular gacha
-			"宿題, Regular Gacha", "通常轉蛋,Regular Gacha", "通常轉蛋(～2017/06/20 14:59),Regular Gacha (After 2017/06/20 14:59)",
+			"宿題,Achievement/Homework", "通常轉蛋,Regular Gacha", "通常轉蛋(～2017/06/20 14:59),Regular Gacha (After 2017/06/20 14:59)",
 			"首次：通常轉蛋（至2015年6月30日17:59）復刻：通常轉蛋（至2015年11月30日14:59）,First Appearance: Regular Gacha (Until 2015/06/30 17:59)\nReprint: Regular Gacha (Until 2015/11/30 14:59)",
 			"通常轉蛋卡片交換所,Regular Gacha and Card Clearinghouse",
 			"通常轉蛋（至2015年11月13日14:59）,Regular Gacha (Until 2015/11/30 14:59)",

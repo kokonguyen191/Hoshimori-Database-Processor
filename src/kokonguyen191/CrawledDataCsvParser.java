@@ -134,6 +134,8 @@ public class CrawledDataCsvParser {
 				toAdd.evolved_nakayoshi_skill_target = line[41];
 				zh.add(toAdd);
 			}
+			dengekiReader.close();
+			zhReader.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -200,7 +202,6 @@ public class CrawledDataCsvParser {
 			StringBuilder sb = new StringBuilder(str.trim());
 			int i = 0;
 			int max = sb.length();
-			boolean hasUnknownChar = false;
 			while (i < max) {
 				char c = sb.charAt(i);
 				if (c == '約') {
@@ -257,10 +258,6 @@ public class CrawledDataCsvParser {
 					sb.replace(i, i + 1, ", ");
 					i += 1;
 					max += 1;
-				} else if (c > 255) {
-					if (c != '親' && c != '密' && c != '度') {
-						hasUnknownChar = true;
-					}
 				}
 				i++;
 			}
@@ -280,7 +277,6 @@ public class CrawledDataCsvParser {
 			StringBuilder sb = new StringBuilder(str.trim());
 			int i = 0;
 			int max = sb.length();
-			boolean hasUnknownChar = false;
 			while (i < max) {
 				char c = sb.charAt(i);
 				if (c == '：') {
@@ -656,7 +652,8 @@ public class CrawledDataCsvParser {
 				String effect = effects.get(i);
 				if (effect.contains("UP") || effect.contains("up") || effect.contains("+")) {
 					positiveEffect = true;
-				} else if (effect.contains("DOWN") || effect.contains("down") || effect.contains("-") || effect.contains("−") || effect.contains("‐")) {
+				} else if (effect.contains("DOWN") || effect.contains("down") || effect.contains("-")
+						|| effect.contains("−") || effect.contains("‐")) {
 					positiveEffect = false;
 				} else {
 					positiveEffect = true;
@@ -679,18 +676,13 @@ public class CrawledDataCsvParser {
 						}
 					} catch (NumberFormatException e) {
 						String valueDegree;
-						String memo;
 						if (effect.contains("小")) {
-							memo = "S";
 							valueDegree = String.format("%s_S", skillType);
 						} else if (effect.contains("超")) {
-							memo = "X";
 							valueDegree = String.format("%s_X", skillType);
 						} else if (effect.contains("大")) {
-							memo = "L";
 							valueDegree = String.format("%s_L", skillType);
 						} else {
-							memo = "M";
 							valueDegree = String.format("%s_M", skillType);
 						}
 						String stringValue = convertScale.get(valueDegree); // Get
@@ -762,7 +754,7 @@ public class CrawledDataCsvParser {
 					toAdd.nakayoshi_skill_effect = dengekiEquivalence.nakayoshi_skill_effect;
 					toAdd.evolved_nakayoshi_skill_effect = dengekiEquivalence.evolved_nakayoshi_skill_effect;
 				}
-				
+
 				// Get images url
 				toAdd.image = returnFileName("hoshimori/static/uploaded/c/icon", toAdd.image);
 				toAdd.special_icon = returnFileName("hoshimori/static/uploaded/c/icon/special", toAdd.special_icon);
@@ -923,7 +915,7 @@ public class CrawledDataCsvParser {
 					}
 					toAdd.evolved_nakayoshi_skill_target = translator.translateSentence(sbNakaEvolved.toString(), ",");
 				}
-				
+
 				// Translate nakayoshi
 				String[] translated_nakayoshi_skill_effect = nakayoshiEffectTranslate(toAdd.nakayoshi_skill_effect);
 				String[] translated_evolved_nakayoshi_skill_effect = nakayoshiEffectTranslate(
@@ -933,7 +925,7 @@ public class CrawledDataCsvParser {
 				toAdd.nakayoshi_skill_effect = translated_nakayoshi_skill_effect[1];
 				toAdd.evolved_nakayoshi_skill_requirement = translated_evolved_nakayoshi_skill_effect[0];
 				toAdd.evolved_nakayoshi_skill_effect = translated_evolved_nakayoshi_skill_effect[1];
-				
+
 				// Add to database
 				database.put(toAdd.name, toAdd);
 			} catch (Exception e) {
@@ -979,19 +971,23 @@ public class CrawledDataCsvParser {
 	}
 
 	public static void main(String[] args) {
-		StopWatch sw = new StopWatch();
-		sw.reset();
-		sw.start();
-		CrawledDataCsvParser cdsp = new CrawledDataCsvParser();
-		cdsp.merge();
-		cdsp.writeCSV();
-		sw.stop();
-		System.out.println();
-		System.out.println("=============================================");
-		System.out.println("=============================================");
-		System.out.println(String.format("==New file written. Total time:%ss==", sw.getTime()));
-		System.out.println("=============================================");
-		System.out.println("=============================================");
-		System.out.println();
+		try {
+			StopWatch sw = new StopWatch();
+			sw.reset();
+			sw.start();
+			CrawledDataCsvParser cdsp = new CrawledDataCsvParser();
+			cdsp.merge();
+			cdsp.writeCSV();
+			sw.stop();
+			System.out.println();
+			System.out.println("=============================================");
+			System.out.println("=============================================");
+			System.out.println(String.format("==New file written. Total time:%ss==", sw.getTime()));
+			System.out.println("=============================================");
+			System.out.println("=============================================");
+			System.out.println();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
